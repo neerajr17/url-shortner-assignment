@@ -15,7 +15,7 @@ public class UrlShortnerController {
     @Autowired
     UrlShortnerService urlShortnerService;
 
-    @RequestMapping(value = "/{url}", method = RequestMethod.POST)
+    @RequestMapping(value = "/shorten/{url}", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity shortenUrl(@PathVariable String url) {
         UrlResponse shortUrl = urlShortnerService.shortenUrl(url);
