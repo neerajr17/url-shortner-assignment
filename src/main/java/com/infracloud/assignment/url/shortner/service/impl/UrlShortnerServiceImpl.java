@@ -16,7 +16,7 @@ import java.util.Map;
 @Slf4j
 public class UrlShortnerServiceImpl implements UrlShortnerService {
 
-    final static String outputFilePath = "D:/write.txt";
+    final static String outputFilePath = System.getProperty("user.dir") + "/url_path_file.txt";
 
     @Override
     public String getUrlByKey(@NotBlank String hash) {
