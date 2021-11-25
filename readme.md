@@ -41,18 +41,16 @@ You can access following API endpoints at http://localhost:8080
 
 ```shell script
 curl -X POST \
-  http://localhost:8080//shorten/{url}'
+  http://localhost:8080?https://www.google.com/search?q=infracloud
 ```
 
 Response:
 
-```json
-{
-  "url": "<shortened url>"
-}
+```redirect url
+http://localhost:8080/some_hash_code
 ```
 
 
-### GET `/<short_url>`
+### GET `http://localhost:8080/<some_hash_code>`
 
 This endpoint redirects to the corresponding fullUrl.
