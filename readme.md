@@ -34,20 +34,19 @@ docker-compose up --build
 
 You can access following API endpoints at http://localhost:8080
 
-### POST `/shorten/{url}`
+### POST `http://localhost:8080?{url}`
 
 
 #### cURL
 
 ```shell script
-curl -X POST \
-  http://localhost:8080?https://www.google.com/search?q=infracloud
+curl --location --request POST 'http://localhost:8080?https://www.google.com/search?q=infracloud'
 ```
 
 Response:
 
 ```redirect url
-http://localhost:8080/some_hash_code
+curl --location --request GET 'http://localhost:8080/200d23c9'
 ```
 
 
