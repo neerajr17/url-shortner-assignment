@@ -1,46 +1,86 @@
 package com.infracloud.assignment.url.shortner.service.impl;
 
 import com.google.common.hash.Hashing;
-import com.infracloud.assignment.url.shortner.model.UrlResponse;
 import com.infracloud.assignment.url.shortner.service.UrlShortnerService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.NotBlank;
-import java.nio.charset.Charset;
-import java.time.LocalDateTime;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Slf4j
 public class UrlShortnerServiceImpl implements UrlShortnerService {
 
-    @Autowired
-    private RedisTemplate<String, UrlResponse> redisTemplate;
+    final static String outputFilePath = "D:/write.txt";
 
     @Override
     public String getUrlByKey(@NotBlank String hash) {
-        UrlResponse url = redisTemplate.opsForValue().get(hash);
-        return url.getUrl();
+        Map<String, String> mapFromFile = hashMapFromTextFile();
+        return mapFromFile.get(hash);
+    }
+
+    public static Map<String, String> hashMapFromTextFile() {
+        Map<String, String> map = new HashMap<>();
+        BufferedReader br = null;
+        try {
+            File file = new File(outputFilePath);
+            br = new BufferedReader(new FileReader(file));
+            String line = null;
+            // read file line by line
+            while ((line = br.readLine()) != null) {
+                // splitting the line by :
+                String[] parts = line.split(",");
+                // first part is hash id, second is url
+                String id = parts[0].trim();
+                String url = parts[1].trim();
+                if (!StringUtils.isEmpty(id) && !StringUtils.isEmpty(id))
+                    map.put(id, url);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (Exception e) {
+                }
+            }
+        }
+        return map;
     }
 
     @Override
-    public UrlResponse shortenUrl(String url) {
-
+    public String shortenUrl(String url) {
+        File file = new File(outputFilePath);
+        BufferedWriter bufferedWriter = null;
         try {
-            String hash = Hashing.murmur3_32().hashString(url, Charset.defaultCharset()).toString();
-            String originalUrl = getUrlByKey(hash);
-            if (originalUrl == null || StringUtils.isEmpty(originalUrl)) {
-                UrlResponse shortUrl = UrlResponse.builder().key(hash).createdDateTime(LocalDateTime.now()).url(url).build();
-                redisTemplate.opsForValue().set(hash, shortUrl);
+            bufferedWriter = new BufferedWriter(new FileWriter(file));
+
+            final String id = Hashing.murmur3_32().hashString(url, StandardCharsets.UTF_8).toString();// creating hash id for url
+
+            Map<String, String> map = new HashMap<>();
+            map.put(id, url);
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                bufferedWriter.write(entry.getKey() + "," + entry.getValue());
+                bufferedWriter.newLine();
             }
-            return UrlResponse.builder().key(hash).url(url).createdDateTime(LocalDateTime.now()).url(url).build();
+            bufferedWriter.flush();
+            return id;
         } catch (Exception e) {
-            log.error("Exception occured while executing shorten URL Service", e.getMessage());
-            return UrlResponse.builder().build();
+            log.error("Exception while storing to Redis Service", e.getMessage());
+            return "";
+        } finally {
+            try {
+                if (bufferedWriter != null) {
+                    bufferedWriter.close();
+                }
+            } catch (Exception e) {
+            }
         }
     }
 
