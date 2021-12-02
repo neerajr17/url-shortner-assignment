@@ -7,8 +7,8 @@ Spring Boot application which takes a URL and returns a shortened URL.
 To build this project, run
 
 ```shell script
-git clone https://github.com/neerajr17/url-shortner-assignment
-cd url-shortner-assignment
+git clone https://github.com/neerajr17/url-shortner-service
+cd url-shortner-service
 mvn clean install
 ```
 
